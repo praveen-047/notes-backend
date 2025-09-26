@@ -14,6 +14,7 @@ app.use(express.json());
 app.use("/auth", require("./routes/auth"));
 app.use("/tenants", require("./routes/tenants"));
 app.use("/notes", require("./routes/notes"));
+app.use("/users", require("./routes/users"));
 
 // health
 app.get("/health", (req, res) => res.json({ status: "ok" }));
