@@ -58,20 +58,6 @@ router.get("/:id", async (req, res) => {
   return res.json(note);
 });
 
-// PUT /notes/:id -> update note
-router.put("/:id", async (req, res) => {
-  const note = await Note.findById(req.params.id);
-  if (!note) return res.status(404).json({ error: "Note not found" });
-  if (String(note.tenant) !== String(req.user.tenantId))
-    return res.status(403).json({ error: "Forbidden" });
-
-  const { title, content } = req.body;
-  if (title !== undefined) note.title = title;
-  if (content !== undefined) note.content = content;
-
-  await note.save();
-  return res.json(note);
-});
 
 // DELETE /notes/:id
 router.delete("/:id", async (req, res) => {
@@ -83,5 +69,27 @@ router.delete("/:id", async (req, res) => {
   await note.deleteOne();
   return res.json({ message: "Note deleted" });
 });
+
+// Update a note
+// PUT /notes/:id -> update note
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id);
+    if (!note) return res.status(404).json({ error: "Note not found" });
+    if (String(note.tenant) !== String(req.user.tenantId))
+      return res.status(403).json({ error: "Forbidden" });
+
+    const { title, content } = req.body;
+    if (title !== undefined) note.title = title;
+    if (content !== undefined) note.content = content;
+
+    await note.save();
+    return res.json({ note }); // <--- return updated note
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 module.exports = router;
